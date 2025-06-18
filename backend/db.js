@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-
-mongoose.connect("postgresql://neondb_owner:npg_46yudXUIlKCm@ep-rough-dream-a88u4xqx-pooler.eastus2.azure.neon.tech/neondb?sslmode=require");
+import POSTGRES_CONNECTION_STRING from "./config";
+mongoose.connect(POSTGRES_CONNECTION_STRING);
 
 const {Schema, model} = mongoose;
 

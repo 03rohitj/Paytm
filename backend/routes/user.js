@@ -1,6 +1,8 @@
 //User router file
 
 import { Router } from "express";
+const bcrypt = require("bcrypt");
+
 const router = Router();
 
 //All the the user related routes are handled here : /api/v1/user/...
