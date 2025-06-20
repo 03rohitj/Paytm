@@ -12,7 +12,8 @@ const JWT_SECRET = require("../config");
 const signupZodSchema = z.object({
     username: z.string().trim().min(5,"Username must be atleast 5 characters long").max(30,"Username must be at max 30 characters long"),
     password: z.string().trim().min(6,"Password must be atleast 6 characters long"),
-    firstName: z.string().trim()
+    firstName: z.string().trim(),
+    lastName: z.string().trim()
 });
 
 const signinZodSchema = z.object({
@@ -24,7 +25,7 @@ const router = Router();
 
 //All the the user related routes are handled here : /api/v1/user/...
 router.post("/signin", async (req, res) => {
-    const success = signinZodSchema.parse(req.body);
+    const {success} = signinZodSchema.safeParse(req.body);
     if(!success){
         return res.status(411).json({
             message : "Invalid inputs"
@@ -57,16 +58,16 @@ router.post("/signin", async (req, res) => {
         message: "Successfully signin",
         token: token
     });
-    
+
 });
 
 router.post("/signup", async(req, res) => {
 
     //parse req through zod
-    const result = signupZodSchema.safeParse(req.body);
+    const {success} = signupZodSchema.safeParse(req.body);
 
     //Validate if inputs are correct
-    if(!result){
+    if(!success){
         return res.status(411).json({
             message: "Invalid Inputs/username already taken"
         });
@@ -101,9 +102,51 @@ router.post("/signup", async(req, res) => {
 
 });
 
-router.post("/profile", (req, res) => {
-
+//zod schema validation when updating user profile
+const updateBodySchema = z.object({
+    password: z.string().optional().trim().min(6,"Password must be atleast 6 characters long"),
+    firstName: z.string().optional().trim(),
+    lastName: z.string().optional().trim()
 });
+
+router.post("/profile", authMiddleware ,async (req, res) => {
+
+    const {success} = updateBodySchema.safeParse(req.body);
+    if(!success){
+        return res.status(411).json({
+            message : "Error updating information, Invalid Data"
+        });
+    }
+    
+    await UserModel.updateOne(req.body, {
+        id: req.userId
+    });
+});
+
+//Get bulk of users based on filter(E.g. if we type 'ro' then all the users with fname or lname have 'ro' should appear)
+router.get("/bulk", async (req, res) =>{
+    const filter = req.query.filter || "";
+    const users = await UserModel.find({
+        $or: [
+                {
+                   firstName: { "$regex": filter }
+                },
+                {
+                   lastName: { "$regex": filter }
+                }
+             ]
+    });
+
+    console.log(">>>>Bulk : ", users);
+    return res.status(200).json({
+        user: users.map( user => ({
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    });
+})
 
 export default router;
 
