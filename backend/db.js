@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import POSTGRES_CONNECTION_STRING from "./config";
+const mongoose = require("mongoose");
+const POSTGRES_CONNECTION_STRING = requrie("./config");
 mongoose.connect(POSTGRES_CONNECTION_STRING);
 
 const {Schema, model} = mongoose;
@@ -7,7 +7,7 @@ const {Schema, model} = mongoose;
 const UserSchema = new Schema({
     username: {
         type: String,
-        require: true,
+        required: true,
         unique: true,
         trim: true,
         lowercase: true,
@@ -16,23 +16,23 @@ const UserSchema = new Schema({
     },
     password: {
         type: String,
-        require: true,
+        required: true,
         minLength: 6
     },
     firstName:{
         type: String,
-        require: true,
+        required: true,
         trim: true,
         maxLength: 50
     },
     lastName:{
         type: String,
-        require: true,
+        required: true,
         trim: true,
         maxLength: 50
     } 
 });
 
-const User = model('User', UserSchema);
+const UserModel = model('User', UserSchema);
 
-module.exports = {User};
+module.exports = { UserModel };
