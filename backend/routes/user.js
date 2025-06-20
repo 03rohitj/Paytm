@@ -5,7 +5,7 @@ import { authMiddleware } from "../middleware";
 const Router = require("express");
 const bcrypt = require("bcrypt");
 const z = require("zod"); 
-const { UserModel } = require("../db");
+const { UserModel, BankModel } = require("../db");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config");
 
@@ -93,7 +93,12 @@ router.post("/signup", async(req, res) => {
         lastName: req.body.lastName
     });
     const userId = newUser._id;
-    console.log(">>>>>>>Signup UserId : ", userId);
+    const newUserBank = await BankModel.create({
+        balance: 500,
+        userId: userId
+    });
+
+    console.log(">>>>>>>Signup UserId : ", userId, " - BankId : ", newUserBank._id);
 
     return res.status(200).json({
         message: "User created successfully!",
@@ -111,6 +116,7 @@ const updateBodySchema = z.object({
 
 router.post("/profile", authMiddleware ,async (req, res) => {
 
+    console.log(">>>>Profile req.userId: ", req.userId);
     const {success} = updateBodySchema.safeParse(req.body);
     if(!success){
         return res.status(411).json({
@@ -120,6 +126,10 @@ router.post("/profile", authMiddleware ,async (req, res) => {
     
     await UserModel.updateOne(req.body, {
         id: req.userId
+    });
+
+    return res.status(201).json({
+        message : "User Updated Successfully"
     });
 });
 
@@ -148,5 +158,5 @@ router.get("/bulk", async (req, res) =>{
     });
 })
 
-export default router;
+module.exports = router;
 

@@ -2,12 +2,13 @@
 // routes/index.js : Main router file which handles sub-routers
 
 const express = require("express");
-const router = express.Router();
-import userRouter from "./user";
+const mainRouter = express.Router();
+const userRouter = require("./user");
+const accountRouter = require("./accounts");
 
-router.use("/user", userRouter);        //All the request related to user will be redirected to userRouter
+mainRouter.use("/user", userRouter);        //All the request related to user will be redirected to userRouter
+mainRouter.use("/account", accountRouter);        //All the request related to accounts/transactions will be redirected to accountRouter
 
 
 
-
-export default router;
+module.exports = mainRouter;

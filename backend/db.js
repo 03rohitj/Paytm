@@ -35,7 +35,7 @@ const UserSchema = new Schema({
 
 const UserModel = model('User', UserSchema);
 
-const BankSchema = new Schema({
+const AccountSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -47,6 +47,6 @@ const BankSchema = new Schema({
         default: 0
     }
 });
-const BankModel = model('Bank', BankSchema);
+const AccountModel = model('Account', AccountSchema);
 
-module.exports = { UserModel, BankModel };
+module.exports = { UserModel, AccountModel };
