@@ -1,5 +1,7 @@
 //User router file
 
+import { authMiddleware } from "../middleware";
+
 const Router = require("express");
 const bcrypt = require("bcrypt");
 const z = require("zod"); 
@@ -51,6 +53,11 @@ router.post("/signin", async (req, res) => {
     }, JWT_SECRET, { expiresIn: '1h' });
 
     console.log(">>>>>SignIn JWT : ", token);
+    return res.status(200).json({
+        message: "Successfully signin",
+        token: token
+    });
+    
 });
 
 router.post("/signup", async(req, res) => {
