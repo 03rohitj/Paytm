@@ -1,13 +1,13 @@
 //User router file
 
-import { authMiddleware } from "../middleware";
+import { authMiddleware } from "../middleware.js";
 
-const Router = require("express");
-const bcrypt = require("bcrypt");
-const z = require("zod"); 
-const { UserModel, BankModel } = require("../db");
-const jwt = require("jsonwebtoken");
-const JWT_SECRET = require("../config");
+import {Router} from "express";
+import bcrypt from "bcrypt";
+import z from "zod"; 
+import { UserModel, AccountModel } from "../db.js";
+import jwt from "jsonwebtoken";
+import {JWT_SECRET} from "../config.js";
 
 const signupZodSchema = z.object({
     username: z.string().trim().min(5,"Username must be atleast 5 characters long").max(30,"Username must be at max 30 characters long"),
@@ -21,10 +21,10 @@ const signinZodSchema = z.object({
     password: z.string().trim().min(6,"Password must be atleast 6 characters long")
 });
 
-const router = Router();
+const userRouter = Router();
 
 //All the the user related routes are handled here : /api/v1/user/...
-router.post("/signin", async (req, res) => {
+userRouter.post("/signin", async (req, res) => {
     const {success} = signinZodSchema.safeParse(req.body);
     if(!success){
         return res.status(411).json({
@@ -32,7 +32,7 @@ router.post("/signin", async (req, res) => {
         });
     }
 
-    const foundUser = await UserModel.findOne(req.body.username);
+    const foundUser = await UserModel.findOne({username: req.body.username});
 
     if(!foundUser){
         console.error(">>>>SignIn : User not found");
@@ -41,13 +41,13 @@ router.post("/signin", async (req, res) => {
         });
     }
 
-    const validCredentials = bcrypt.compare(password, foundUser.password);
+    const validCredentials = bcrypt.compare(req.body.password, foundUser.password);
     if(!validCredentials){
         return res.status(411).json({
             message : "Invalid Password"
         });
     }
-    console.log("SignIn : User found", foundUser);
+    console.log("SignIn : User found", foundUser.username);
 
     const token = jwt.sign({
         userId: foundUser._id
@@ -61,7 +61,7 @@ router.post("/signin", async (req, res) => {
 
 });
 
-router.post("/signup", async(req, res) => {
+userRouter.post("/signup", async(req, res) => {
 
     //parse req through zod
     const {success} = signupZodSchema.safeParse(req.body);
@@ -93,12 +93,12 @@ router.post("/signup", async(req, res) => {
         lastName: req.body.lastName
     });
     const userId = newUser._id;
-    const newUserBank = await BankModel.create({
+    const newUserAccount = await AccountModel.create({
         balance: 500,
         userId: userId
     });
 
-    console.log(">>>>>>>Signup UserId : ", userId, " - BankId : ", newUserBank._id);
+    console.log(">>>>>>>Signup UserId : ", userId, " - AccountId : ", newUserAccount._id);
 
     return res.status(200).json({
         message: "User created successfully!",
@@ -109,12 +109,12 @@ router.post("/signup", async(req, res) => {
 
 //zod schema validation when updating user profile
 const updateBodySchema = z.object({
-    password: z.string().optional().trim().min(6,"Password must be atleast 6 characters long"),
-    firstName: z.string().optional().trim(),
-    lastName: z.string().optional().trim()
+    password: z.string().trim().min(6,"Password must be atleast 6 characters long").optional(),
+    firstName: z.string().trim().optional(),
+    lastName: z.string().trim().optional()
 });
 
-router.post("/profile", authMiddleware ,async (req, res) => {
+userRouter.post("/profile", authMiddleware ,async (req, res) => {
 
     console.log(">>>>Profile req.userId: ", req.userId);
     const {success} = updateBodySchema.safeParse(req.body);
@@ -134,20 +134,20 @@ router.post("/profile", authMiddleware ,async (req, res) => {
 });
 
 //Get bulk of users based on filter(E.g. if we type 'ro' then all the users with fname or lname have 'ro' should appear)
-router.get("/bulk", async (req, res) =>{
+userRouter.get("/bulk", async (req, res) =>{
     const filter = req.query.filter || "";
+    //Find record using regex, similar to sql 'like' query
     const users = await UserModel.find({
         $or: [
                 {
-                   firstName: { "$regex": filter }
+                   firstName: { "$regex": filter, $options: 'i' }       //$options 'i' indicate case insensitive
                 },
                 {
-                   lastName: { "$regex": filter }
+                   lastName: { "$regex": filter, $options: 'i' }
                 }
              ]
     });
 
-    console.log(">>>>Bulk : ", users);
     return res.status(200).json({
         user: users.map( user => ({
             username: user.username,
@@ -158,5 +158,5 @@ router.get("/bulk", async (req, res) =>{
     });
 })
 
-module.exports = router;
+export {userRouter};
 

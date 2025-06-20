@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const POSTGRES_CONNECTION_STRING = requrie("./config");
+import mongoose from "mongoose";
+import {POSTGRES_CONNECTION_STRING} from "./config.js";
 mongoose.connect(POSTGRES_CONNECTION_STRING);
 
 const {Schema, model} = mongoose;
@@ -49,4 +49,4 @@ const AccountSchema = new Schema({
 });
 const AccountModel = model('Account', AccountSchema);
 
-module.exports = { UserModel, AccountModel };
+export { UserModel, AccountModel };
