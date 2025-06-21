@@ -26,7 +26,7 @@ const transferZodSchema = z.object({
 accountRouter.post("/transfer", authMiddleware, async(req,res) => {
     const {success} = transferZodSchema.safeParse(req.body);
     if(!success){
-        return json.status(400).json({
+        return res.status(400).json({
             message: "Invalid Input"
         });
     }
@@ -59,7 +59,7 @@ accountRouter.post("/transfer", authMiddleware, async(req,res) => {
     //Commit the transaction
     await session.commitTransaction();
     
-    res(200).json({
+    res.status(200).json({
         message: "Transfer Successful"
     });
 
