@@ -11,7 +11,6 @@ export const SendMoney = () => {
     const fname = searchParams.get("fname");
     const [amount, setAmount] = useState(0);
 
-    console.log(">>>>SendMoney token : ", localStorage.getItem("token"));
     return (
         <div className=' flex min-h-[100dvh] bg-slate-300 items-center justify-center'>
             <div className='flex flex-col bg-white w-96  justify-center p-3 rounded-lg'>
@@ -39,6 +38,8 @@ export const SendMoney = () => {
                                 "Authorization": `Bearer ${localStorage.getItem("token")}`
                             }
                         });
+
+                        
                     }} text={"Initiate Transfer"} variant={"green"}/>
                 </div>
             </div>
