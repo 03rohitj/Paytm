@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 
 export function authMiddleware(req,res,next){
     const authHeader = req.headers.authorization;
+    console.log("AuthMiddleware : ", req.headers);
+    //console.log(">>>>AuthMiddleware token : ", localStorage.getItem("token"));
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(403).json({
             message : "UnAuthorized Access"

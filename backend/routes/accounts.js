@@ -21,9 +21,10 @@ accountRouter.get("/balance", authMiddleware, async(req, res) => {
 
 const transferZodSchema = z.object({
     to: string().trim(),
-    amount: number().min(1, "Amount should be +ve value")
+    amount: z.coerce.number()
 });
 accountRouter.post("/transfer", authMiddleware, async(req,res) => {
+    console.log(">>>BE transfer : ", req.body);
     const {success} = transferZodSchema.safeParse(req.body);
     if(!success){
         return res.status(400).json({

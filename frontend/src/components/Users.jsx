@@ -1,26 +1,38 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "./Button"
 import { InputBox } from "./Inputbox"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Users = () => {
     const [ usersList, setUsersList ] = useState([
-        {
-            firstName: "Rohit",
-            lastName : "Jangid",
-            _id: 1
-        },
-        {
-            firstName: "Harkirat",
-            lastName : "Singh",
-            _id: 2
-        }
+        // {
+        //     firstName: "Rohit",
+        //     lastName : "Jangid",
+        //     _id: 1
+        // },
+        // {
+        //     firstName: "Harkirat",
+        //     lastName : "Singh",
+        //     _id: 2
+        // }
     ]);
+    const [filter,setFilter] = useState("");
+
+    useEffect(() => {
+        axios.get("http://localhost:3000/api/v1/user/bulk?filter="+filter)
+            .then( res => {
+                setUsersList(res.data.user);
+            })
+    }, [filter]);
 
     return (
         <div className="flex flex-col m-4">
             <div className="h-14 flex flex-col justify-center font-bold text-lg">Users</div>
-            <div className="w-64 h-8">
-                <input type="search" placeholder="Search users..." className="rounded-md w-full h-full p-2"/>
+            <div className="w-full h-16 border border-gray-300 rounded-md">
+                <input onChange={ (e) => {
+                    setFilter(e.target.value)
+                }} type="search" placeholder="Search users..." className="rounded-md w-full h-full p-2"/>
             </div>
             <div className="flex flex-col w-full py-4">
                 {usersList.map( user => <User user={user} key={user._id}/> )}
@@ -31,6 +43,7 @@ export const Users = () => {
 }
 
 function User({user}){
+    const navigate = useNavigate();
     return (
         <div className="flex justify-between my-2">
             <div className="flex">
@@ -45,7 +58,13 @@ function User({user}){
             </div>
 
             <div className="flex h-14 mr-2">
-                <Button text={"Send Money"}/>
+                <Button onClick={() => {
+                    const id = user._id;
+                    const fname = user.firstName;
+                    const lname = user.lastName;
+                    
+                    navigate("/sendMoney?id="+id+"&fname="+fname+"&lname="+lname);
+                }} text={"Send Money"}/>
             </div>
         </div>
     )

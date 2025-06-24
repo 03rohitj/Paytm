@@ -63,6 +63,7 @@ userRouter.post("/signin", async (req, res) => {
 
 userRouter.post("/signup", async(req, res) => {
 
+    console.log(">>>>>>Backend, Signup payload:", req.body);
     //parse req through zod
     const {success} = signupZodSchema.safeParse(req.body);
 
